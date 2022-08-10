@@ -19,10 +19,17 @@ module.exports = {
           'css-loader'
         ],
       },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
+      },
     ],
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    alias: {
+      Images: path.resolve(__dirname, 'images/'),
+    }
   },
   output: {
     filename: 'bundle.[hash].js',
