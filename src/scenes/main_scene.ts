@@ -1,6 +1,7 @@
-import { Scene, Cameras, Input, GameObjects } from "phaser";
+import { Scene, Cameras, Input, GameObjects, Math as PhaserMath} from "phaser";
 import SnakeSprite from 'Images/bacteria.png';
 import { Snake } from "../snake";
+import { Point } from "../utils";
 
 export class MainScene extends Scene {
 
@@ -51,7 +52,8 @@ export class MainScene extends Scene {
   update(time: number, delta: number) {
     // console.log("update");
     for (const snake of this.snakes) {
-      const decision = snake.makeDecision();
+
+      const decision = snake.makeDecision({closestSnake: this.getClosestSnake(snake)});
       if (decision[1]) {
         snake.moveForward();
       }
@@ -62,6 +64,22 @@ export class MainScene extends Scene {
         snake.turnRight();
       }
     }
+  }
+
+  private getClosestSnake(snake: Snake): Point | undefined {
+    let min = -1;
+    let minSnake = undefined;
+    for (const oSnake of this.snakes) {
+      if (oSnake !== snake) {
+        const dist = PhaserMath.Distance.Between(oSnake.x, oSnake.y, snake.x, snake.y);
+        if (min == -1 || min < dist) {
+          min = dist;
+          minSnake = oSnake;
+        }
+      }
+    }
+    return {x: minSnake.x, y: minSnake.y};
+
   }
 
 }

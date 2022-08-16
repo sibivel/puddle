@@ -16,6 +16,7 @@
     "webpack-cli": "^4.8.0"
   },
   "dependencies": {
+    "@tensorflow/tfjs": "^3.19.0",
     "gh-pages": "^3.2.3",
     "numjs": "^0.16.1",
     "phaser": "^3.55.2",
