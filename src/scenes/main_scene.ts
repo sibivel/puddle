@@ -1,11 +1,11 @@
-import { Scene } from "phaser";
+import { Scene, Cameras, Input, GameObjects } from "phaser";
 import SnakeSprite from 'Images/bacteria.png';
 import { Snake } from "../snake";
 
 export class MainScene extends Scene {
-  
-  private snakes: Snake[] = [];
 
+  private snakes: Snake[] = [];
+  private draggingOrigin?: number[];
   constructor() {
     super({});
   }
@@ -16,11 +16,36 @@ export class MainScene extends Scene {
   }
 
   create() {
+    this.cameras.main.setBounds(-16000, -12000, 32000, 24000);
+    this.cameras.main.setZoom(1);
+    // this.cameras.main.centerOn(0, 0);
     for (let i = 0; i < 100; i++) {
-      this.snakes.push(new Snake(this, Math.random() * this.sys.game.canvas.width, Math.random() * this.sys.game.canvas.height));
+      this.snakes.push(new Snake(this, Math.random() * this.sys.game.canvas.width, Math.random() * this.sys.game.canvas.height, Math.random() * 2 * Math.PI));
     }
-    this.snakes.forEach(snake => this.children.add(snake));
 
+    this.input.on('wheel', (pointer: Input.Pointer, currentlyOver: Array<GameObjects.GameObject>, deltaX: number, deltaY: number, deltaZ: number) => {
+      const scrollDelta = -deltaY / 100;
+      const zoomSpeed = 0.2;
+      const newZoom = this.cameras.main.zoom * (1 + scrollDelta * zoomSpeed);
+      this.cameras.main.zoom = newZoom;
+    });
+
+    this.input.on('pointerdown', (pointer: Input.Pointer, currentlyOver: Array<GameObjects.GameObject>) => {
+      this.draggingOrigin = [pointer.worldX, pointer.worldY];
+    });
+
+    this.input.on('pointermove', (pointer: Input.Pointer, currentlyOver: Array<GameObjects.GameObject>) => {
+      if (this.draggingOrigin) {
+        const sx = pointer.worldX - this.draggingOrigin[0];
+        const sy = pointer.worldY - this.draggingOrigin[1];
+        this.cameras.main.scrollX -= sx
+        this.cameras.main.scrollY -= sy
+      }
+    });
+
+    this.input.on('pointerup', (pointer: Input.Pointer, currentlyOver: Array<GameObjects.GameObject>) => {
+      this.draggingOrigin = undefined;
+    });
   }
 
   update(time: number, delta: number) {
@@ -38,5 +63,5 @@ export class MainScene extends Scene {
       }
     }
   }
-  
+
 }
