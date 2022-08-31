@@ -7,7 +7,7 @@
     "allowJs": false,
     "sourceMap": true,
     "moduleResolution": "node",
-    // "allowSyntheticDefaultImports": true
+    "downlevelIteration": true
   },
   "include": [
     "src/**/*"
