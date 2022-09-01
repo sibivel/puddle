@@ -3,6 +3,7 @@ import SnakeSprite from 'Images/bacteria.png';
 import { Snake } from "../snake";
 import { coinflip, Point } from "../utils";
 import { Food } from "../food";
+import { StaticScene } from "./static_scene";
 
 export class MainScene extends Scene {
 
@@ -12,29 +13,27 @@ export class MainScene extends Scene {
   private snakeFood: Map<Snake, Set<Food>> = new Map();
   private draggingOrigin?: number[];
   private lastTick = 0;
-  debugText: GameObjects.Text;
   constructor() {
     super({});
+    Scene.call(this, { key: 'MainScene' });
   }
 
   preload() {
-    this.cameras.main.setBackgroundColor("#333333");
     this.load.image('snake', SnakeSprite);
   }
 
   create() {
-    this.debugText = this.add.text(10, 30, '', { font: '16px Courier', color: '#ffffff' });
     this.cameras.main.setBounds(-5000, -5000, 10000, 10000);
-    this.cameras.main.setZoom(1);
-    // this.cameras.main.centerOn(0, 0);
-    for (let i = 0; i < 100; i++) {
-      this.spawnRandomSnake();
-    }
+    this.cameras.main.setZoom(0.35);
+    this.cameras.main.centerOn(1500, 1500);
+    // for (let i = 0; i < 100; i++) {
+    //   this.spawnRandomSnake();
+    // }
 
-    for (let i = 0; i < 100; i++) {
-      const food = new Food(this, Math.random() * 3000, Math.random() * 3000);
-      this.foods.add(food);
-    }
+    // for (let i = 0; i < 100; i++) {
+    //   const food = new Food(this, Math.random() * 3000, Math.random() * 3000);
+    //   this.foods.add(food);
+    // }
 
     this.physics.add.overlap(this.snakes, this.snakes, (object1: Phaser.Types.Physics.Arcade.GameObjectWithBody, object2: Phaser.Types.Physics.Arcade.GameObjectWithBody) => {
       if (object1 instanceof Snake && object2 instanceof Snake) {
@@ -123,9 +122,10 @@ export class MainScene extends Scene {
     }
     if (tick) {
       debug.push(`Snake count: ${this.snakes.countActive()}`);
-      const avgThinkingTime = (this.snakes.getChildren() as Snake[]).map((s: Snake)=> s.thinkingTime).reduce((sum, value) => sum + value);
-      debug.push(`Avg Thinking Time: ${avgThinkingTime}`);
-      this.debugText.setText(debug);
+      debug.push(`Food count: ${this.foods.countActive()}`);
+      // const avgThinkingTime = (this.snakes.getChildren() as Snake[]).map((s: Snake)=> s.thinkingTime).reduce((sum, value) => sum + value);
+      // debug.push(`Avg Thinking Time: ${avgThinkingTime}`);
+      this.events.emit('updateDebugText', debug)
       this.lastTick = time;
 
     }
@@ -178,21 +178,7 @@ export class MainScene extends Scene {
   }
 
   private growFood() {
-    const foodList = this.foods.getChildren();
-    let x;
-    let y;
-    // if (coinflip() && coinflip()) {
-      x = Math.random() * 3000;
-      y = Math.random() * 3000;
-    // } else {
-    //   const baseFood = foodList[Math.floor(Math.random() * foodList.length)] as Food;
-    //   const dx = Math.random() * 500 - 250;
-    //   const dy = Math.random() * 500 - 250;
-    //   x = baseFood.x + dx;
-    //   y = baseFood.y + dy
-    // }
-
-    const food = new Food(this, x, y);
+    const food = new Food(this, Math.random() * 3000, Math.random() * 3000);
     this.foods.add(food);
   }
 

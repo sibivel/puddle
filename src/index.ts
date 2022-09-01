@@ -1,6 +1,7 @@
 import "./styles.css";
 import { Game } from "phaser";
 import { MainScene } from "./scenes/main_scene";
+import { StaticScene } from "./scenes/static_scene";
 window.addEventListener('load', () => {
   const header = document.createElement('h1');
   // header.innerText = 'Webpack❤️TS Header'
@@ -17,7 +18,8 @@ window.addEventListener('load', () => {
         debug: false,
       }
     },
-    scene: new MainScene(),
+    backgroundColor: '#222222',
+    scene: [new MainScene(), new StaticScene()],
   };
 
   var game = new Game(config);

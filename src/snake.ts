@@ -12,6 +12,7 @@ export class Snake extends GameObjects.Container {
   public static readonly VIEW_DISTANCE = 1000;
   public static readonly STARTING_HEALTH = 100;
   public static readonly HAVE_CHILD_HEALTH = 300;
+  private static readonly ASYNC_DECISIONS = false;
   public health = Snake.STARTING_HEALTH;
   private speed = 1;
   private rotationSpeed = 0.03;
@@ -19,7 +20,7 @@ export class Snake extends GameObjects.Container {
   private decision = [false, false, false];
   private thinking = false;
   thinkingTime = 0;
-  
+
   private sprite;
   private physicsBody: Physics.Arcade.Body;
   //for color changing only.
@@ -34,10 +35,6 @@ export class Snake extends GameObjects.Container {
     this.sprite.displayHeight = 20;
     this.sprite.displayWidth = 70;
 
-    // const arc = scene.add.arc(0, 0, 200, 0, 360, false);
-    // arc.setStrokeStyle(5, 0x00ff00, 0.1);
-    // console.log(arc);
-    // this.add(arc);
     scene.physics.add.existing(this);
     this.physicsBody = (this.body as Physics.Arcade.Body);
     this.physicsBody.setSize(2 * Snake.VIEW_DISTANCE, 2 * Snake.VIEW_DISTANCE, true);
@@ -52,9 +49,11 @@ export class Snake extends GameObjects.Container {
       const childWeights: tf.Tensor[] = [];
       for (const layer of parentWeights) {
         const newLayer = tf.tidy(() => {
-          const shouldModify = tf.randomUniform(layer.shape, 0, 1).greaterEqual(tf.scalar(0.8));
-          const coeffecient = tf.ones(layer.shape).add(shouldModify.mul(tf.randomUniform(layer.shape, -0.3, 0.3)));
-          return layer.mul(coeffecient);
+          // sometimes change the weights a lot.
+          const shouldModify = tf.randomUniform(layer.shape, 0, 1).greaterEqual(tf.scalar(0.99));
+          const coeffecient = tf.ones(layer.shape).add(shouldModify.mul(tf.randomUniform(layer.shape, -0.5, 0.5)));
+          // always modify a little bit.
+          return layer.mul(tf.ones(layer.shape).add(tf.randomUniform(layer.shape, -0.05, 0.05))).mul(coeffecient);
         });
         childWeights.push(newLayer);
         // console.log(layer.dataSync());
@@ -74,9 +73,6 @@ export class Snake extends GameObjects.Container {
     const otherSnakeCoords = this.getRelativeCoords(input.closestSnake);
     const foodCoords = this.getRelativeCoords(input.closestFood);
     const prediction = (this.brain.predict(tf.tensor([
-      // otherSnakeCoords[0],
-      // otherSnakeCoords[1],
-      // otherSnakeCoords[2],
       foodCoords[0],
       // foodCoords[1],
       foodCoords[2],
