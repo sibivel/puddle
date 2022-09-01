@@ -9,7 +9,6 @@ export class MainScene extends Scene {
 
   private snakes: GameObjects.Group = new GameObjects.Group(this);
   private foods: GameObjects.Group = new GameObjects.Group(this);
-  private snakeNeighbors: Map<Snake, Set<Snake>> = new Map();
   private snakeFood: Map<Snake, Set<Food>> = new Map();
   private draggingOrigin?: number[];
   private lastTick = 0;
@@ -35,12 +34,6 @@ export class MainScene extends Scene {
     //   this.foods.add(food);
     // }
 
-    this.physics.add.overlap(this.snakes, this.snakes, (object1: Phaser.Types.Physics.Arcade.GameObjectWithBody, object2: Phaser.Types.Physics.Arcade.GameObjectWithBody) => {
-      if (object1 instanceof Snake && object2 instanceof Snake) {
-        this.snakeNeighbors.get(object1).add(object2);
-        this.snakeNeighbors.get(object2).add(object1);
-      }
-    });
     this.physics.add.overlap(this.snakes, this.foods, (object1: Phaser.Types.Physics.Arcade.GameObjectWithBody, object2: Phaser.Types.Physics.Arcade.GameObjectWithBody) => {
       if (object1 instanceof Snake && object2 instanceof Food) {
         this.snakeFood.get(object1).add(object2);
@@ -91,7 +84,7 @@ export class MainScene extends Scene {
         snake.health -= 1;
       }
       snake.setClosestFood(closestFood);
-      snake.makeDecision({ closestSnake: this.getClosestSnake(snake), closestFood: ((closestFood) ? { x: closestFood?.x, y: closestFood?.y } : undefined) });
+      snake.makeDecision({ closestFood: ((closestFood) ? { x: closestFood?.x, y: closestFood?.y } : undefined) });
       if (closestFood && PhaserMath.Distance.Between(closestFood.x, closestFood.y, snake.x, snake.y) < 30) {
         snake.health += 50;
         closestFood.removeFromDisplayList();
@@ -110,7 +103,6 @@ export class MainScene extends Scene {
         snake.turnRight();
       }
       if (snake.maybeKill()) {
-        this.snakeNeighbors.delete(snake);
         this.snakeFood.delete(snake);
         this.snakes.remove(snake);
       }
@@ -131,22 +123,6 @@ export class MainScene extends Scene {
     }
   }
 
-  private getClosestSnake(snake: Snake): Point | undefined {
-    let min = -1;
-    let minSnake = undefined;
-    for (const oSnake of this.snakeNeighbors.get(snake)) {
-      if (oSnake !== snake) {
-        const dist = PhaserMath.Distance.Between(oSnake.x, oSnake.y, snake.x, snake.y);
-        if (dist > 2 * Snake.VIEW_DISTANCE) {
-          this.snakeNeighbors.get(snake).delete(oSnake);
-        } else if (min == -1 || min > dist) {
-          min = dist;
-          minSnake = oSnake;
-        }
-      }
-    }
-    return (minSnake) ? { x: minSnake.x, y: minSnake.y } : undefined
-  }
   private getClosestFood(snake: Snake): Food | undefined {
     let min = -1;
     let minFood = undefined;
@@ -173,7 +149,6 @@ export class MainScene extends Scene {
 
   private spawnSnake(snake: Snake) {
     this.snakes.add(snake);
-    this.snakeNeighbors.set(snake, new Set());
     this.snakeFood.set(snake, new Set());
   }
 

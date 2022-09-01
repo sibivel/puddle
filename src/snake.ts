@@ -5,7 +5,7 @@ import { Food } from "./food";
 tf.setBackend('cpu');
 console.log(tf.getBackend());
 export interface DecisionInput {
-  closestSnake?: Point;
+  closestSnake?: Point; // Not used.
   closestFood?: Point;
 }
 export class Snake extends GameObjects.Container {
@@ -70,14 +70,11 @@ export class Snake extends GameObjects.Container {
       return;
     }
     const startTime = Date.now();
-    const otherSnakeCoords = this.getRelativeCoords(input.closestSnake);
     const foodCoords = this.getRelativeCoords(input.closestFood);
     const prediction = (this.brain.predict(tf.tensor([
       foodCoords[0],
-      // foodCoords[1],
       foodCoords[2],
-      // this.rotation
-    ], [1, 2])) as tf.Tensor); //should be [1,7]
+    ], [1, 2])) as tf.Tensor);
     this.thinking = true;
     // prediction.data().then(result => {
     //   this.decision = [result[0] > 0.5, result[1] > 0.5, result[2] > 0.5];
@@ -92,7 +89,6 @@ export class Snake extends GameObjects.Container {
     prediction.dispose();
     this.thinking = false;
     this.thinkingTime = Date.now() - startTime;
-    // this.decision = [true, true, false];
   }
 
   public getDecision(): boolean[] {
