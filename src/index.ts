@@ -10,15 +10,15 @@ window.addEventListener('load', () => {
   body.prepend(header);
   var config = {
     type: Phaser.AUTO,
-    width: 1920,
-    height: 1080,
+    width:  window.visualViewport.width * 0.75,
+    height: window.visualViewport.height * 0.9,
     physics: {
       default: 'arcade',
       arcade: {
         debug: false,
       }
     },
-    backgroundColor: '#222222',
+    backgroundColor: '#444444',
     scene: [new MainScene(), new StaticScene()],
   };
 

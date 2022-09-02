@@ -42,7 +42,6 @@ export class Snake extends GameObjects.Container {
     this.physicsBody.onOverlap = true;
     this.physicsBody.onCollide = true;
 
-
     this.brain.add(tf.layers.dense({ units: 2, inputShape: [2], activation: 'sigmoid', useBias: true }));
     if (!!parent) {
       const parentWeights = parent.brain.getWeights();

@@ -1,9 +1,7 @@
 import { Scene, Cameras, Input, GameObjects, Math as PhaserMath } from "phaser";
 import SnakeSprite from 'Images/bacteria.png';
 import { Snake } from "../snake";
-import { coinflip, Point } from "../utils";
 import { Food } from "../food";
-import { StaticScene } from "./static_scene";
 
 export class MainScene extends Scene {
 
@@ -67,7 +65,7 @@ export class MainScene extends Scene {
 
 
 
-  update(time: number, delta: number) {
+  update(time: number) {
     const debug = [];
     const tick = time - this.lastTick > 100;
     if (tick) {
