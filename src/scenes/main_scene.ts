@@ -2,6 +2,7 @@ import { Scene, Cameras, Input, GameObjects, Math as PhaserMath } from "phaser";
 import SnakeSprite from 'Images/bacteria.png';
 import { Snake } from "../snake";
 import { Food } from "../food";
+import { CHILD_SPAWN_DISTANCE, FOOD_HEALTH_VALUE, MIN_ACTIVE_FOOD, MIN_ACTIVE_SNAKES, TICK_LENGTH_MS } from "../constants";
 
 export class MainScene extends Scene {
 
@@ -67,12 +68,12 @@ export class MainScene extends Scene {
 
   update(time: number) {
     const debug = [];
-    const tick = time - this.lastTick > 100;
+    const tick = time - this.lastTick > TICK_LENGTH_MS;
     if (tick) {
-      if (this.snakes.countActive() < 20) {
+      if (this.snakes.countActive() < MIN_ACTIVE_SNAKES) {
         this.spawnRandomSnake();
       }
-      if (this.foods.countActive() < 500) {
+      if (this.foods.countActive() < MIN_ACTIVE_FOOD) {
         this.growFood();
       }
     }
@@ -84,7 +85,7 @@ export class MainScene extends Scene {
       snake.setClosestFood(closestFood);
       snake.makeDecision({ closestFood: ((closestFood) ? { x: closestFood?.x, y: closestFood?.y } : undefined) });
       if (closestFood && PhaserMath.Distance.Between(closestFood.x, closestFood.y, snake.x, snake.y) < 30) {
-        snake.health += 50;
+        snake.health += FOOD_HEALTH_VALUE;
         closestFood.removeFromDisplayList();
         closestFood.destroy();
         this.foods.remove(closestFood);
@@ -105,7 +106,7 @@ export class MainScene extends Scene {
         this.snakes.remove(snake);
       }
       if (snake.maybeClone()) {
-        const childSnake = new Snake(this, snake.x + Math.random() * 100 - 50, snake.y + Math.random() * 100 - 50, Math.random() * 2 * Math.PI, snake);
+        const childSnake = new Snake(this, snake.x + Math.random() * CHILD_SPAWN_DISTANCE * 2 - CHILD_SPAWN_DISTANCE, snake.y + Math.random() * CHILD_SPAWN_DISTANCE * 2 - CHILD_SPAWN_DISTANCE, Math.random() * 2 * Math.PI, snake);
         snake.health -= childSnake.health;
         this.spawnSnake(childSnake);
       }
@@ -113,11 +114,8 @@ export class MainScene extends Scene {
     if (tick) {
       debug.push(`Snake count: ${this.snakes.countActive()}`);
       debug.push(`Food count: ${this.foods.countActive()}`);
-      // const avgThinkingTime = (this.snakes.getChildren() as Snake[]).map((s: Snake)=> s.thinkingTime).reduce((sum, value) => sum + value);
-      // debug.push(`Avg Thinking Time: ${avgThinkingTime}`);
       this.events.emit('updateDebugText', debug)
       this.lastTick = time;
-
     }
   }
 
