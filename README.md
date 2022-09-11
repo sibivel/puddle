@@ -1,6 +1,6 @@
 # Darwin's Puddle
 
-This is a browser based experiment where trying to simulate natural selection. Snakes spawn with random neural networks. As snakes survive and reproduce, the neural networks are randomly adjusted. Snakes with effective neural networks should survive while others die.
+This is a browser based experiment trying to simulate natural selection. Snakes spawn with random neural networks. As snakes survive and reproduce, the neural networks are randomly adjusted. Snakes with effective neural networks should survive while others die.
 
 ---
 
@@ -19,8 +19,6 @@ New snakes are spawned with random weights in their neural networks. When snakes
 If the number of live snakes drops too low, new snakes are spawned randomly.
 
 ---
-
-Starts with an empty canvas that is initialized in src/index.ts.
 
 Develop locally using `yarn start` and going to `localhost:3000`
 
