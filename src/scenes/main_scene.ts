@@ -5,9 +5,11 @@ import { Food } from '../food';
 import {
   CHILD_SPAWN_DISTANCE,
   FOOD_HEALTH_VALUE,
+  MAP_SIZE,
   MIN_ACTIVE_FOOD,
   MIN_ACTIVE_SNAKES,
   TICK_LENGTH_MS,
+  VIEW_DISTANCE,
 } from '../constants';
 
 export class MainScene extends Scene {
@@ -28,7 +30,7 @@ export class MainScene extends Scene {
   create() {
     this.cameras.main.setBounds(-5000, -5000, 10000, 10000);
     this.cameras.main.setZoom(0.35);
-    this.cameras.main.centerOn(1500, 1500);
+    this.cameras.main.centerOn(MAP_SIZE / 2, MAP_SIZE / 2);
     // for (let i = 0; i < 100; i++) {
     //   this.spawnRandomSnake();
     // }
@@ -167,7 +169,7 @@ export class MainScene extends Scene {
         continue;
       }
       const dist = PhaserMath.Distance.Between(food.x, food.y, snake.x, snake.y);
-      if (dist > 2 * Snake.VIEW_DISTANCE) {
+      if (dist > 2 * VIEW_DISTANCE) {
         this.snakeFood.get(snake).delete(food);
       } else if (min == -1 || min > dist) {
         min = dist;
@@ -180,8 +182,8 @@ export class MainScene extends Scene {
   private spawnRandomSnake() {
     const snake = new Snake(
         this,
-        Math.random() * 3000,
-        Math.random() * 3000,
+        Math.random() * MAP_SIZE,
+        Math.random() * MAP_SIZE,
         Math.random() * 2 * Math.PI
     );
     this.spawnSnake(snake);
@@ -193,7 +195,7 @@ export class MainScene extends Scene {
   }
 
   private growFood() {
-    const food = new Food(this, Math.random() * 3000, Math.random() * 3000);
+    const food = new Food(this, Math.random() * MAP_SIZE, Math.random() * MAP_SIZE);
     this.foods.add(food);
   }
 }

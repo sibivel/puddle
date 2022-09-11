@@ -21,6 +21,13 @@ window.addEventListener('load', () => {
     backgroundColor: '#444444',
     scene: [new MainScene(), new StaticScene()],
   };
-
   new Game(config);
+  const pageLink = document.createElement('a');
+  const linkText = 'https://github.com/sibivel/puddle';
+  pageLink.append(document.createTextNode(linkText));
+  pageLink.href = linkText;
+  pageLink.style.fontFamily = 'consolas';
+  pageLink.style.fontSize = '24px';
+  pageLink.style.display = 'block';
+  body.append(pageLink);
 });

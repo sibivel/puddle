@@ -1,6 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const {CleanWebpackPlugin} = require("clean-webpack-plugin");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
@@ -14,10 +14,7 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: [
-          MiniCssExtractPlugin.loader,
-          'css-loader'
-        ],
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
       {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
@@ -29,7 +26,7 @@ module.exports = {
     extensions: ['.tsx', '.ts', '.js'],
     alias: {
       Images: path.resolve(__dirname, 'images/'),
-    }
+    },
   },
   output: {
     filename: 'bundle.[hash].js',
@@ -38,8 +35,9 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, "./src/templates/index.html")
+      template: path.resolve(__dirname, './src/templates/index.html'),
+      favicon: './images/emoji_u1f40d.png',
     }),
     new MiniCssExtractPlugin(),
-  ]
+  ],
 };

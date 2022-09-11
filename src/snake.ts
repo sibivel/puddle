@@ -2,6 +2,15 @@ import { GameObjects, Scene, Math as PhaserMath, Physics } from 'phaser';
 import { Point } from './utils';
 import * as tf from '@tensorflow/tfjs';
 import { Food } from './food';
+import {
+  HAVE_CHILD_HEALTH,
+  MUTATION_CHANCE,
+  ROTATION_SPEED,
+  SNAKE_SPEED,
+  STARTING_HEALTH,
+  VIEW_DISTANCE,
+  WEIGHT_ADJUSTMENT,
+} from './constants';
 tf.setBackend('cpu');
 console.log(tf.getBackend());
 export interface DecisionInput {
@@ -9,13 +18,8 @@ export interface DecisionInput {
   closestFood?: Point;
 }
 export class Snake extends GameObjects.Container {
-  public static readonly VIEW_DISTANCE = 1000;
-  public static readonly STARTING_HEALTH = 100;
-  public static readonly HAVE_CHILD_HEALTH = 300;
   private static readonly ASYNC_DECISIONS = false;
-  public health = Snake.STARTING_HEALTH;
-  private speed = 1;
-  private rotationSpeed = 0.03;
+  public health = STARTING_HEALTH;
   private brain = tf.sequential();
   private decision = [false, false, false];
   private thinking = false;
@@ -37,27 +41,35 @@ export class Snake extends GameObjects.Container {
 
     scene.physics.add.existing(this);
     this.physicsBody = this.body as Physics.Arcade.Body;
-    this.physicsBody.setSize(2 * Snake.VIEW_DISTANCE, 2 * Snake.VIEW_DISTANCE, true);
-    this.physicsBody.setCircle(Snake.VIEW_DISTANCE);
+    this.physicsBody.setSize(2 * VIEW_DISTANCE, 2 * VIEW_DISTANCE, true);
+    this.physicsBody.setCircle(VIEW_DISTANCE);
     this.physicsBody.onOverlap = true;
     this.physicsBody.onCollide = true;
 
     this.brain.add(
         tf.layers.dense({ units: 2, inputShape: [2], activation: 'sigmoid', useBias: true })
     );
+
     if (parent) {
+      // Copy parent's brain and adjust slightly:
       const parentWeights = parent.brain.getWeights();
       const childWeights: tf.Tensor[] = [];
       for (const layer of parentWeights) {
         const newLayer = tf.tidy(() => {
           // sometimes change the weights a lot.
-          const shouldModify = tf.randomUniform(layer.shape, 0, 1).greaterEqual(tf.scalar(0.99));
+          const shouldMutate = tf
+              .randomUniform(layer.shape, 0, 1)
+              .greaterEqual(tf.scalar(1 - MUTATION_CHANCE));
           const coeffecient = tf
               .ones(layer.shape)
-              .add(shouldModify.mul(tf.randomUniform(layer.shape, -0.5, 0.5)));
+              .add(shouldMutate.mul(tf.randomUniform(layer.shape, -1, 1)));
           // always modify a little bit.
           return layer
-              .mul(tf.ones(layer.shape).add(tf.randomUniform(layer.shape, -0.05, 0.05)))
+              .mul(
+                  tf
+                      .ones(layer.shape)
+                      .add(tf.randomUniform(layer.shape, -WEIGHT_ADJUSTMENT, WEIGHT_ADJUSTMENT))
+              )
               .mul(coeffecient);
         });
         childWeights.push(newLayer);
@@ -100,16 +112,16 @@ export class Snake extends GameObjects.Container {
   }
 
   public moveForward() {
-    this.x += Math.cos(this.rotation) * this.speed;
-    this.y += Math.sin(this.rotation) * this.speed;
+    this.x += Math.cos(this.rotation) * SNAKE_SPEED;
+    this.y += Math.sin(this.rotation) * SNAKE_SPEED;
   }
 
   public turnLeft() {
-    this.rotation -= this.rotationSpeed;
+    this.rotation -= ROTATION_SPEED;
   }
 
   public turnRight() {
-    this.rotation += this.rotationSpeed;
+    this.rotation += ROTATION_SPEED;
   }
 
   public maybeKill(): boolean {
@@ -125,7 +137,7 @@ export class Snake extends GameObjects.Container {
   }
 
   public maybeClone(): boolean {
-    return this.health >= Snake.HAVE_CHILD_HEALTH;
+    return this.health >= HAVE_CHILD_HEALTH;
   }
 
   private getRelativeCoords(point: Point): number[] {
@@ -133,7 +145,7 @@ export class Snake extends GameObjects.Container {
       return [0, 0, 0];
     }
     const dist = PhaserMath.Distance.Between(point.x, point.y, this.x, this.y);
-    if (dist > Snake.VIEW_DISTANCE) {
+    if (dist > VIEW_DISTANCE) {
       return [0, 0, 0];
     }
     const dx = point.x - this.x;
