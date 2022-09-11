@@ -11,6 +11,3 @@ export const FOOD_HEALTH_VALUE = 50;
 export const TICK_LENGTH_MS = 100;
 
 export const CHILD_SPAWN_DISTANCE = 50;
-
-
- 

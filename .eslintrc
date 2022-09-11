@@ -1,0 +1,13 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "extends": ["eslint:recommended", "google"],
+  "rules": {
+    "require-jsdoc": "off",
+    "object-curly-spacing": "off",
+    "max-len": ["error", { "code": 100 }],
+    "new-cap": "off",
+    "no-undef": "off",
+    "no-invalid-this": "off"
+  }
+}

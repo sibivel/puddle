@@ -1,7 +1,7 @@
-import { GameObjects, Scene, Math as PhaserMath, Physics } from "phaser";
-import { coinflip, Point } from "./utils";
-import * as tf from "@tensorflow/tfjs";
-import { Food } from "./food";
+import { GameObjects, Scene, Math as PhaserMath, Physics } from 'phaser';
+import { Point } from './utils';
+import * as tf from '@tensorflow/tfjs';
+import { Food } from './food';
 tf.setBackend('cpu');
 console.log(tf.getBackend());
 export interface DecisionInput {
@@ -23,7 +23,7 @@ export class Snake extends GameObjects.Container {
 
   private sprite;
   private physicsBody: Physics.Arcade.Body;
-  //for color changing only.
+  // for color changing only.
   closestFood?: Food;
   constructor(scene: Scene, x: number, y: number, rotation: number, parent?: Snake) {
     super(scene, x, y);
@@ -36,23 +36,29 @@ export class Snake extends GameObjects.Container {
     this.sprite.displayWidth = 70;
 
     scene.physics.add.existing(this);
-    this.physicsBody = (this.body as Physics.Arcade.Body);
+    this.physicsBody = this.body as Physics.Arcade.Body;
     this.physicsBody.setSize(2 * Snake.VIEW_DISTANCE, 2 * Snake.VIEW_DISTANCE, true);
     this.physicsBody.setCircle(Snake.VIEW_DISTANCE);
     this.physicsBody.onOverlap = true;
     this.physicsBody.onCollide = true;
 
-    this.brain.add(tf.layers.dense({ units: 2, inputShape: [2], activation: 'sigmoid', useBias: true }));
-    if (!!parent) {
+    this.brain.add(
+        tf.layers.dense({ units: 2, inputShape: [2], activation: 'sigmoid', useBias: true })
+    );
+    if (parent) {
       const parentWeights = parent.brain.getWeights();
       const childWeights: tf.Tensor[] = [];
       for (const layer of parentWeights) {
         const newLayer = tf.tidy(() => {
           // sometimes change the weights a lot.
           const shouldModify = tf.randomUniform(layer.shape, 0, 1).greaterEqual(tf.scalar(0.99));
-          const coeffecient = tf.ones(layer.shape).add(shouldModify.mul(tf.randomUniform(layer.shape, -0.5, 0.5)));
+          const coeffecient = tf
+              .ones(layer.shape)
+              .add(shouldModify.mul(tf.randomUniform(layer.shape, -0.5, 0.5)));
           // always modify a little bit.
-          return layer.mul(tf.ones(layer.shape).add(tf.randomUniform(layer.shape, -0.05, 0.05))).mul(coeffecient);
+          return layer
+              .mul(tf.ones(layer.shape).add(tf.randomUniform(layer.shape, -0.05, 0.05)))
+              .mul(coeffecient);
         });
         childWeights.push(newLayer);
         // console.log(layer.dataSync());
@@ -70,10 +76,9 @@ export class Snake extends GameObjects.Container {
     }
     const startTime = Date.now();
     const foodCoords = this.getRelativeCoords(input.closestFood);
-    const prediction = (this.brain.predict(tf.tensor([
-      foodCoords[0],
-      foodCoords[2],
-    ], [1, 2])) as tf.Tensor);
+    const prediction = this.brain.predict(
+        tf.tensor([foodCoords[0], foodCoords[2]], [1, 2])
+    ) as tf.Tensor;
     this.thinking = true;
     // prediction.data().then(result => {
     //   this.decision = [result[0] > 0.5, result[1] > 0.5, result[2] > 0.5];
@@ -133,7 +138,7 @@ export class Snake extends GameObjects.Container {
     }
     const dx = point.x - this.x;
     const dy = point.y - this.y;
-    return [(Math.atan(dy / dx)), dist, 1];
+    return [Math.atan(dy / dx), dist, 1];
   }
 
   getCenter() {
@@ -149,5 +154,4 @@ export class Snake extends GameObjects.Container {
     }
     this.closestFood = food;
   }
-
-}           
+}
