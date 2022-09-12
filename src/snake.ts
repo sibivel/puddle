@@ -65,11 +65,7 @@ export class Snake extends GameObjects.Container {
               .add(shouldMutate.mul(tf.randomUniform(layer.shape, -1, 1)));
           // always modify a little bit.
           return layer
-              .mul(
-                  tf
-                      .ones(layer.shape)
-                      .add(tf.randomUniform(layer.shape, -WEIGHT_ADJUSTMENT, WEIGHT_ADJUSTMENT))
-              )
+              .add(tf.randomUniform(layer.shape, -WEIGHT_ADJUSTMENT, WEIGHT_ADJUSTMENT))
               .mul(coeffecient);
         });
         childWeights.push(newLayer);

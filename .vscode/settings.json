@@ -9,5 +9,8 @@
   },
   "[json]": {
     "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
   } // required to format on save
 }
